@@ -1,0 +1,16 @@
+services:
+  postgress:
+    image: postgres:18
+    container_name: money_pocket_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: money_pocket_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql
+
+volumes:
+  dbdata:
