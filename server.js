@@ -3,7 +3,7 @@ const { sequelize } = require('./src/config/database');
 const Bank = require('./src/models/bank');
 const Bill = require('./src/models/bill');
 const Activity = require('./src/models/activity');
-const { STATUS } = require('./src/constants/bill-const');
+const { STATUS, FREQUENCY, ACCOUNT_TYPE } = require('./src/constants/bill-const');
 const { Op } = require('sequelize');
 
 const app = express();
@@ -77,7 +77,7 @@ app.get('/activities', async (req, res) => {
 });
 
 app.post('/activity', async (req, res) => {
-    const {title, amount, isDeduct} = req.body;
+    const {title, amount, isDeduct, deductFrom} = req.body;
 
     const activity = Activity.create({
         title: title,
@@ -89,7 +89,11 @@ app.post('/activity', async (req, res) => {
         if (!bank) {
             res.status(404).send('bank not found')
         }
-        bank.secondary_amount = Number(bank.secondary_amount) - Number(amount);
+        if (ACCOUNT_TYPE.PRIMARY == deductFrom) {
+            bank.primary_amount = Number(bank.primary_amount) - Number(amount);
+        } else {
+            bank.secondary_amount = Number(bank.secondary_amount) - Number(amount);
+        }
         bank.save();
     }
 
@@ -105,13 +109,27 @@ app.get('/bills-count', async (req, res) => {
             status: STATUS.PAID
         }
     });
-    const sumBills = await Bill.sum('price');
+
+    const sumMonthlyBills = await Bill.sum('price',{
+        where: {
+            frequency: FREQUENCY.MONTHLY
+        }
+    });
+
+    const sumYearlyBills = await Bill.sum('price',{
+        where: {
+            frequency: FREQUENCY.YEARLY
+        }
+    });
+
+    const sumYearlyTotalBills = (sumMonthlyBills * 12) + sumYearlyBills
+
 
     if (!totalBills) {
         res.status(404).send('not found')
     }
 
-    res.status(200).send({total_bills: totalBills, paid_bills: paidBills, sum_bills: sumBills});
+    res.status(200).send({total_bills: totalBills, paid_bills: paidBills, sum_bills: sumMonthlyBills, sum_yearly_bills: sumYearlyTotalBills });
 });
 
 app.get('/bills', async (req, res) => {
@@ -247,6 +265,15 @@ app.listen(port, async () => {
     console.log('Connection has been established successfully.');
     await sequelize.sync({ force: false });
     console.log('All models were synchronized successfully.');
+    const currentBank = await Bank.findOne();
+    if (!currentBank) {
+        await Bank.create({
+            primary_amount: 0,
+            secondary_amount: 0,
+            saving_amount: 0,
+            savingFor: "PRIMARY",
+        }); 
+    }
     } catch (error) {
     console.error('Unable to connect to the database:', error);
     }

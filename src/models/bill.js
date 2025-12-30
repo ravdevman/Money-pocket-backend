@@ -28,7 +28,7 @@ const Bill = sequelize.define(
       type: DataTypes.STRING(20),
     },
   },
-    {
+  {
     tableName: 'bill',
     timestamps: true,
   }

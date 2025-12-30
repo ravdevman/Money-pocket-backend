@@ -8,7 +8,13 @@ const FREQUENCY  = {
     YEARLY: "YEARLY"
 }
 
+const ACCOUNT_TYPE = {
+    PRIMARY: "PRIMARY",
+    SECONDARY: "SECONDARY"
+} 
+
 module.exports = {
     STATUS,
-    FREQUENCY
+    FREQUENCY,
+    ACCOUNT_TYPE
 }
