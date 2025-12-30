@@ -1,4 +1,15 @@
 services:
+  app:
+    build: .
+    container_name: money_pocket_app
+    restart: unless-stopped
+    env_file: 
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
   postgress:
     image: postgres:18
     container_name: money_pocket_db
