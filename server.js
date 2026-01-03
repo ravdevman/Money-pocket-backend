@@ -266,14 +266,14 @@ app.listen(port, async () => {
     await sequelize.sync({ force: false });
     console.log('All models were synchronized successfully.');
     const currentBank = await Bank.findOne();
-    if (!currentBank) {
-        await Bank.create({
-            primary_amount: 0,
-            secondary_amount: 0,
-            saving_amount: 0,
-            savingFor: "PRIMARY",
-        }); 
-    }
+        if (!currentBank) {
+            await Bank.create({
+                primary_amount: 0,
+                secondary_amount: 0,
+                saving_amount: 0,
+                savingFor: "PRIMARY",
+            }); 
+        }
     } catch (error) {
     console.error('Unable to connect to the database:', error);
     }
