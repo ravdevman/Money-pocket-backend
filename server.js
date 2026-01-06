@@ -3,7 +3,7 @@ const { sequelize } = require('./src/config/database');
 const Bank = require('./src/models/bank');
 const Bill = require('./src/models/bill');
 const Activity = require('./src/models/activity');
-const { STATUS, FREQUENCY, ACCOUNT_TYPE } = require('./src/constants/bill-const');
+const { STATUS, FREQUENCY, ACCOUNT_TYPE, METHODS, EXPENSES_TYPE } = require('./src/constants/bill-const');
 const { Op } = require('sequelize');
 
 const app = express();
@@ -77,24 +77,30 @@ app.get('/activities', async (req, res) => {
 });
 
 app.post('/activity', async (req, res) => {
-    const {title, amount, isDeduct, deductFrom} = req.body;
+    console.log("req.body ", req.body)
+
+    const {title, amount, isDeduct, deductFrom, type, method} = req.body;
 
     const activity = Activity.create({
         title: title,
-        amount: amount
+        amount: amount,
+        type: type,
+        method: method
     });
 
-    if (isDeduct) {
-        const bank = await Bank.findOne();
-        if (!bank) {
-            res.status(404).send('bank not found')
+    if (method == METHODS.CARD) {
+        if (isDeduct) {
+            const bank = await Bank.findOne();
+            if (!bank) {
+                res.status(404).send('bank not found')
+            }
+            if (ACCOUNT_TYPE.PRIMARY == deductFrom) {
+                bank.primary_amount = Number(bank.primary_amount) - Number(amount);
+            } else {
+                bank.secondary_amount = Number(bank.secondary_amount) - Number(amount);
+            }
+            bank.save();
         }
-        if (ACCOUNT_TYPE.PRIMARY == deductFrom) {
-            bank.primary_amount = Number(bank.primary_amount) - Number(amount);
-        } else {
-            bank.secondary_amount = Number(bank.secondary_amount) - Number(amount);
-        }
-        bank.save();
     }
 
     res.status(200).send(activity);
@@ -197,6 +203,7 @@ app.put('/bill-status', async (req, res) => {
             await Activity.create({
                 title: "Facture: " + bill.name,
                 amount: bill.price,
+                type: EXPENSES_TYPE.BILL,
                 isBillPayment: true,
                 bill_id: bill.id
             })

@@ -13,8 +13,26 @@ const ACCOUNT_TYPE = {
     SECONDARY: "SECONDARY"
 } 
 
+
+const METHODS = {
+    CASH: "CASH",
+    CARD: "CARD"
+}
+
+const EXPENSES_TYPE = {
+    FOOD: "FOOD",
+    TRANSPORTATION: "TRANSPORTATION",
+    GIFT: "GIFT",
+    ESSENTIAL: "ESSENTIAL",
+    ACTIVITY: "ACTIVITY",
+    BILL: "BILL",
+    OTHER: "OTHER"
+}
+
 module.exports = {
     STATUS,
     FREQUENCY,
-    ACCOUNT_TYPE
+    ACCOUNT_TYPE,
+    EXPENSES_TYPE,
+    METHODS
 }

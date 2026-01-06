@@ -18,6 +18,12 @@ const Activity = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    type: {
+      type: DataTypes.STRING,
+    },
+    method: {
+      type: DataTypes.STRING,
+    },
     isBillPayment: {
       type: DataTypes.BOOLEAN,
     },
